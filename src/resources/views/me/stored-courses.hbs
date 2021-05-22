@@ -1,0 +1,156 @@
+<form name="container-form" method="POST" class="mt-4" action="/courses/handle-form-actions">
+    <div>
+        <h3>khoá học của tôi</h3>
+        <a href="/me/trash/courses">Thùng rác ({{deletedCount}})</a>
+
+        <div class="mt-4 d-flex align-items-center">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="checkbox-all">
+                <label class="form-check-label" for="checkbox-all">
+                    Chọn tất cả
+                </label>
+            </div>
+
+            <select class="form-control form-control-sm checkbox-select-all-options" name="actions" required>
+                <option value="">-- Hành động --</option>
+                <option value="delete">xoá</option>
+            </select>
+
+            <button class="btn btn-primary btn-sm check-all-submit-btn" disabled>Thực hiện</button>
+        </div>
+    </div>
+
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th scope="col" colspan="2">#</th>
+                <th scope="col">
+                    Tên khoá học
+                    {{{sortable 'name' _sort}}}
+                </th>
+                <th scope="col">
+                    Trình độ
+                    {{{sortable 'level' _sort}}}
+                </th>
+                <th scope="col" colspan="2">
+                    Thờ gian tạo
+                    {{{sortable 'createdAt' _sort}}}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each courses}}
+            <tr>
+                <td>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="courseIds[]" value="{{this._id}}">
+                    </div>
+                </td>
+                <th scope="row">{{sum @index 1}}</th>
+                <td>{{this.name}}</td>
+                <td>{{this.level}}</td>
+                <td>{{this.createdAt}}</td>
+                <td>
+                    <a href="/courses/{{this._id}}/edit" class="btn btn-link">Sửa</a>
+                    <a href="" class="btn btn-link" data-toggle="modal" data-target="#delete-course-modal"
+                        data-id="{{this._id}}">Xoá</a>
+                </td>
+            </tr>
+            {{else}}
+
+            <tr>
+                <td colspan="5" class="text-center">Bạn chưa đăng khoá học nào.
+                    <a href="/courses/create">Đăng khoá học</a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</form>
+
+
+<div class="modal fade" id="delete-course-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Xoá khoá học?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn chắc chắn muốn xoá khoá học này chứ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Huỷ</button>
+                <button id="btn-delete-course" type="button" class="btn btn-danger">Xoá bỏ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<form name="delete-course-form" method="POST"></form>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var courseId;
+        var deleteForm = document.forms['delete-course-form'];
+        $('#delete-course-modal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            courseId = button.data('id'); // Extract info from data-* attributes
+
+        });
+
+        var btnDeleteCourse = document.getElementById('btn-delete-course');
+        btnDeleteCourse.onclick = function () {
+            deleteForm.action = '/courses/' + courseId + '?_method=DELETE';
+            deleteForm.submit();
+        }
+
+        var checkboxAll = $('#checkbox-all');
+        var courseItemCheckbox = $('input[name="courseIds[]"]')
+
+        checkboxAll.change(function () {
+            var isCheckedAll = $(this).prop('checked');
+            if (isCheckedAll) {
+                courseItemCheckbox.prop('checked', true);
+            } else {
+                courseItemCheckbox.prop('checked', false);
+            }
+            renderCheckAllSubmitBtn();
+        });
+
+
+        //item clicked
+        courseItemCheckbox.change(function () {
+            var isCheckedAll = courseItemCheckbox.length === $('input[name="courseIds[]"]:checked').length;
+            if (isCheckedAll) {
+                checkboxAll.prop('checked', true);
+            } else {
+                checkboxAll.prop('checked', false);
+            }
+            renderCheckAllSubmitBtn();
+        });
+
+
+           
+        function renderCheckAllSubmitBtn() {
+            var checkedCount = $('input[name="courseIds[]"]:checked').length;
+            if (checkedCount) {
+                checkAllSubmitBtn.removeAttr('disabled');
+            } else {
+                checkAllSubmitBtn.attr('disabled', true);
+            }
+        }
+
+
+        var checkAllSubmitBtn = $('.check-all-submit-btn'); 
+        var containerForm = $('form[name="container-form"]');
+       
+       
+    });
+
+</script>

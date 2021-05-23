@@ -20,11 +20,10 @@ class CourseController {
     store(req, res, next) {
         req.body.image = `https://img.youtube.com/vi/${req.body.videoId}/sddefault.jpg`;
         const course = new Course(req.body);
-        course.save()
+        course
+            .save()
             .then(() => res.redirect('/me/stored/courses'))
-            .catch(error => {
-
-            })
+            .catch(next)
     }
     //[GET] /course/:id/edit
     edit(req, res, next) {
@@ -68,7 +67,7 @@ class CourseController {
     handleFormActions(req, res, next) {
         switch (req.body.actions) {
             case 'delete':
-                Course.delete({ _id: { $in: req.body.courseIds} })
+                Course.delete({ _id: { $in: req.body.courseIds } })
                     .then(() => res.redirect('back'))
                     .catch(next)
                 break;
